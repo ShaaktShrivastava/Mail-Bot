@@ -41,10 +41,12 @@ function AuthPageContent() {
   const handleGoogleCallback = async (code: string) => {
     try {
       // Exchange code for token via backend
+      const redirectUri = `${window.location.origin}/auth`
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ code, redirect_uri: redirectUri })
       })
 
       if (!response.ok) throw new Error('Authentication failed')

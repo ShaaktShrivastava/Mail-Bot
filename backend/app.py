@@ -49,6 +49,7 @@ class AuthRequest(BaseModel):
 
 class GoogleAuthRequest(BaseModel):
     code: str
+    redirect_uri: Optional[str] = None
 
 # Response models
 class EmailResponse(BaseModel):
@@ -88,7 +89,8 @@ async def google_auth(auth_req: GoogleAuthRequest):
         # Get environment variables
         client_id = os.getenv("GOOGLE_CLIENT_ID")
         client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-        redirect_uri = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/auth")
+        # Use redirect_uri from request, fallback to env var
+        redirect_uri = auth_req.redirect_uri or os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:3000/auth")
         
         print(f"Using client_id: {client_id[:20] if client_id else 'MISSING'}...")
         print(f"Using redirect_uri: {redirect_uri}")
