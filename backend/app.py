@@ -47,6 +47,9 @@ class AuthRequest(BaseModel):
     email: str
     gmail_token: dict
 
+class GoogleAuthRequest(BaseModel):
+    code: str
+
 # Response models
 class EmailResponse(BaseModel):
     id: str
@@ -71,6 +74,68 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+@app.post("/api/auth/google")
+async def google_auth(auth_req: GoogleAuthRequest):
+    """Handle Google OAuth callback."""
+    try:
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import Flow
+        import json
+        
+        # Create client config from environment variables
+        client_config = {
+            "web": {
+                "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+                "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token"
+            }
+        }
+        
+        # Exchange authorization code for tokens
+        flow = Flow.from_client_config(
+            client_config,
+            scopes=['https://www.googleapis.com/auth/gmail.modify'],
+            redirect_uri=os.getenv('GOOGLE_REDIRECT_URI', 'http://localhost:3000/auth')
+        )
+        
+        flow.fetch_token(code=auth_req.code)
+        credentials = flow.credentials
+        
+        # Get user email from token
+        from googleapiclient.discovery import build
+        service = build('gmail', 'v1', credentials=credentials)
+        profile = service.users().getProfile(userId='me').execute()
+        email = profile['emailAddress']
+        
+        # Save user to Supabase
+        user_data = {
+            "email": email,
+            "gmail_token": {
+                "token": credentials.token,
+                "refresh_token": credentials.refresh_token,
+                "token_uri": credentials.token_uri,
+                "client_id": credentials.client_id,
+                "client_secret": credentials.client_secret,
+                "scopes": credentials.scopes
+            },
+            "created_at": datetime.now().isoformat()
+        }
+        
+        result = supabase.table("users").upsert(user_data, on_conflict="email").execute()
+        
+        # Generate JWT token
+        token = jwt.encode(
+            {"email": email, "exp": datetime.utcnow() + timedelta(days=30)},
+            os.getenv("JWT_SECRET", "your-secret-key"),
+            algorithm="HS256"
+        )
+        
+        return {"token": token, "user": {"email": email, "id": result.data[0].get('id') if result.data else None}}
+    except Exception as e:
+        print(f"Auth error: {e}")
+        raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
 
 @app.post("/api/auth/login")
 async def login(auth_req: AuthRequest):
