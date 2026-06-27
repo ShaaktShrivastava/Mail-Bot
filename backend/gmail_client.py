@@ -22,6 +22,8 @@ class GmailClient:
     def _authenticate_from_dict(self, credentials_dict: Dict):
         """Authenticate using credentials dictionary from database."""
         try:
+            print(f"Authenticating from dict with keys: {credentials_dict.keys()}")
+            
             creds = Credentials(
                 token=credentials_dict.get('token'),
                 refresh_token=credentials_dict.get('refresh_token'),
@@ -31,13 +33,20 @@ class GmailClient:
                 scopes=credentials_dict.get('scopes', SCOPES)
             )
             
+            print("Credentials object created, checking if expired...")
             # Refresh if expired
             if creds.expired and creds.refresh_token:
+                print("Token expired, refreshing...")
                 creds.refresh(Request())
+                print("Token refreshed successfully")
             
+            print("Building Gmail service...")
             self.service = build('gmail', 'v1', credentials=creds)
+            print("Gmail service built successfully")
         except Exception as e:
             print(f"Auth from dict error: {e}")
+            import traceback
+            traceback.print_exc()
             raise
     
     def _authenticate_from_file(self):
