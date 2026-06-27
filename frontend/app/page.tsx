@@ -49,17 +49,18 @@ export default function Home() {
     }
   }
 
-  const sendMessage = async () => {
-    if (!input.trim()) return
+  const sendMessage = async (customInput?: string) => {
+    const messageToSend = customInput || input
+    if (!messageToSend.trim()) return
 
-    const userMessage = { role: 'user', content: input }
+    const userMessage = { role: 'user', content: messageToSend }
     setMessages(prev => [...prev, userMessage])
-    setInput('')
+    if (!customInput) setInput('')
     setLoading(true)
 
     try {
       const response = await axios.post(`${API_URL}/api/agent/query`, {
-        message: input,
+        message: messageToSend,
         user_id: userEmail || localStorage.getItem('user_email') || 'demo-user'
       })
 
@@ -67,12 +68,12 @@ export default function Home() {
       setMessages(prev => [...prev, aiMessage])
       
       // Reload emails if action was performed
-      if (input.toLowerCase().includes('send') || 
-          input.toLowerCase().includes('archive') ||
-          input.toLowerCase().includes('delete') ||
-          input.toLowerCase().includes('show') ||
-          input.toLowerCase().includes('list')) {
-        loadEmails()
+      if (messageToSend.toLowerCase().includes('send') || 
+          messageToSend.toLowerCase().includes('archive') ||
+          messageToSend.toLowerCase().includes('delete') ||
+          messageToSend.toLowerCase().includes('show') ||
+          messageToSend.toLowerCase().includes('list')) {
+        setTimeout(() => loadEmails(), 1000) // Reload after 1 second
       }
     } catch (error) {
       console.error('Error:', error)
@@ -126,16 +127,31 @@ export default function Home() {
                 </p>
                 <div className="mt-3 flex gap-2">
                   <button
-                    onClick={() => setInput(`Read email ${email.id}`)}
-                    className="text-xs px-3 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      sendMessage(`Read email ${email.id}`)
+                    }}
+                    className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
                   >
-                    Read
+                    📖 Read
                   </button>
                   <button
-                    onClick={() => setInput(`Archive email ${email.id}`)}
-                    className="text-xs px-3 py-1 bg-gray-50 text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      sendMessage(`Archive email ${email.id}`)
+                    }}
+                    className="text-xs px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors font-medium"
                   >
-                    Archive
+                    📦 Archive
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      sendMessage(`Star email ${email.id}`)
+                    }}
+                    className="text-xs px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors font-medium"
+                  >
+                    ⭐ Star
                   </button>
                 </div>
               </div>
@@ -264,10 +280,7 @@ export default function Home() {
                     {['Show unread emails', 'Summarize my inbox', 'Check urgent emails'].map(suggestion => (
                       <button
                         key={suggestion}
-                        onClick={() => {
-                          setInput(suggestion)
-                          setTimeout(() => sendMessage(), 100)
-                        }}
+                        onClick={() => sendMessage(suggestion)}
                         className="px-4 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
                       >
                         {suggestion}
