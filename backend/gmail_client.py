@@ -11,12 +11,37 @@ from email.mime.text import MIMEText
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
 class GmailClient:
-    def __init__(self):
+    def __init__(self, credentials_dict: Optional[Dict] = None):
+        """Initialize Gmail client with credentials dict or local file."""
         self.service = None
-        self._authenticate()
+        if credentials_dict:
+            self._authenticate_from_dict(credentials_dict)
+        else:
+            self._authenticate_from_file()
     
-    def _authenticate(self):
-        """Authenticate with Gmail API using OAuth."""
+    def _authenticate_from_dict(self, credentials_dict: Dict):
+        """Authenticate using credentials dictionary from database."""
+        try:
+            creds = Credentials(
+                token=credentials_dict.get('token'),
+                refresh_token=credentials_dict.get('refresh_token'),
+                token_uri=credentials_dict.get('token_uri', 'https://oauth2.googleapis.com/token'),
+                client_id=credentials_dict.get('client_id'),
+                client_secret=credentials_dict.get('client_secret'),
+                scopes=credentials_dict.get('scopes', SCOPES)
+            )
+            
+            # Refresh if expired
+            if creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            
+            self.service = build('gmail', 'v1', credentials=creds)
+        except Exception as e:
+            print(f"Auth from dict error: {e}")
+            raise
+    
+    def _authenticate_from_file(self):
+        """Authenticate with Gmail API using OAuth (local file method)."""
         creds = None
         if os.path.exists('token.json'):
             creds = Credentials.from_authorized_user_file('token.json', SCOPES)
@@ -25,6 +50,8 @@ class GmailClient:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
+                if not os.path.exists('credentials.json'):
+                    raise Exception("credentials.json not found. Please set up OAuth credentials.")
                 flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
                 creds = flow.run_local_server(port=0)
             

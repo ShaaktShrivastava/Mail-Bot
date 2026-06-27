@@ -171,9 +171,8 @@ async def login(auth_req: AuthRequest):
 async def list_emails(query_req: QueryRequest):
     """List emails."""
     try:
-        agent = MailPilotAgent()
-        result = agent.list_emails(query=query_req.query, max_results=query_req.max_results)
-        return {"emails": result}
+        # This endpoint needs authentication - should be called from agent
+        raise HTTPException(status_code=400, detail="Please use /api/agent/query endpoint with natural language")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -236,20 +235,40 @@ async def delete_email(email_id: str):
 async def agent_query(query: UserQuery):
     """Process natural language query through agent."""
     try:
-        agent = get_agent(query.user_id)
+        # Get user's gmail token from Supabase
+        user_data = supabase.table("users").select("*").eq("email", query.user_id).execute()
+        
+        if not user_data.data:
+            raise HTTPException(status_code=401, detail="User not authenticated. Please sign in first.")
+        
+        gmail_token = user_data.data[0].get('gmail_token')
+        if not gmail_token:
+            raise HTTPException(status_code=401, detail="Gmail not connected. Please authenticate with Gmail.")
+        
+        # Create agent with user's Gmail credentials
+        agent = MailPilotAgent(gmail_credentials=gmail_token)
+        
         result = agent.process_request(query.message)
         
         # Save to history in Supabase
-        supabase.table("chat_history").insert({
-            "user_id": query.user_id,
-            "message": query.message,
-            "response": result,
-            "timestamp": datetime.now().isoformat()
-        }).execute()
+        try:
+            supabase.table("chat_history").insert({
+                "user_id": query.user_id,
+                "message": query.message,
+                "response": result,
+                "timestamp": datetime.now().isoformat()
+            }).execute()
+        except:
+            pass  # Don't fail if chat history save fails
         
         return {"response": result}
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Query error: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 @app.post("/api/emails/summarize")
 async def summarize_emails(query_req: QueryRequest):
