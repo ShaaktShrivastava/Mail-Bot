@@ -1,7 +1,7 @@
 """MailPilot AI Agent with LLM-powered email management."""
 import os
 import json
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import google.generativeai as genai
 from gmail_client import GmailClient
 from agent_memory import AgentMemory
