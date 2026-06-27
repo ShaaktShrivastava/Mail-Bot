@@ -98,8 +98,84 @@ export default function Home() {
     // Try to parse as JSON for email lists
     try {
       const parsed = JSON.parse(content)
+      
+      // Single email detail (has 'body' field)
+      if (parsed.from && parsed.body) {
+        return (
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            {/* Email Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 border-b border-blue-200">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <p className="text-xs text-gray-500 mb-1">From</p>
+                  <p className="text-sm font-semibold text-gray-900">{parsed.from}</p>
+                </div>
+                <span className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full">
+                  {new Date(parsed.date).toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Subject</p>
+                <p className="text-base font-bold text-gray-900">{parsed.subject}</p>
+              </div>
+            </div>
+            
+            {/* Email Body */}
+            <div className="p-6 bg-white">
+              <div className="prose prose-sm max-w-none">
+                {parsed.body
+                  .replace(/\r\n/g, '\n')
+                  .replace(/={40,}/g, '') // Remove separator lines
+                  .split('\n')
+                  .filter((line: string) => line.trim())
+                  .map((line: string, idx: number) => {
+                    // Detect links
+                    if (line.startsWith('http')) {
+                      return (
+                        <a 
+                          key={idx}
+                          href={line}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline block mb-2 text-xs break-all"
+                        >
+                          🔗 {line.length > 50 ? line.substring(0, 50) + '...' : line}
+                        </a>
+                      )
+                    }
+                    // Regular text
+                    return <p key={idx} className="mb-2 text-gray-700 leading-relaxed">{line}</p>
+                  })}
+              </div>
+            </div>
+            
+            {/* Action Footer */}
+            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex gap-3">
+              <button
+                onClick={() => sendMessage(`Draft reply to email: ${parsed.subject}`)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                ✍️ Draft Reply
+              </button>
+              <button
+                onClick={() => sendMessage(`Summarize this email`)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+              >
+                📝 Summarize
+              </button>
+            </div>
+          </div>
+        )
+      }
+      
+      // Email list (array of emails)
       if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
-        // It's an email list
         return (
           <div className="space-y-3">
             <p className="text-sm font-medium text-gray-700 mb-3">
