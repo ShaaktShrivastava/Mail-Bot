@@ -60,7 +60,9 @@ export default function Home() {
       // Reload emails if action was performed
       if (input.toLowerCase().includes('send') || 
           input.toLowerCase().includes('archive') ||
-          input.toLowerCase().includes('delete')) {
+          input.toLowerCase().includes('delete') ||
+          input.toLowerCase().includes('show') ||
+          input.toLowerCase().includes('list')) {
         loadEmails()
       }
     } catch (error) {
@@ -72,6 +74,72 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const formatResponse = (content: string) => {
+    // Try to parse as JSON for email lists
+    try {
+      const parsed = JSON.parse(content)
+      if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id) {
+        // It's an email list
+        return (
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Found {parsed.length} email{parsed.length !== 1 ? 's' : ''}:
+            </p>
+            {parsed.map((email: any) => (
+              <div 
+                key={email.id} 
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {email.from.split('<')[0].trim()}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {email.from.match(/<(.+)>/)?.[1] || email.from}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-400 ml-3 whitespace-nowrap">
+                    {new Date(email.date).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: new Date(email.date).getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                    })}
+                  </span>
+                </div>
+                <p className="text-sm font-medium text-gray-800 mb-2 line-clamp-1">
+                  {email.subject}
+                </p>
+                <p className="text-xs text-gray-600 line-clamp-2">
+                  {email.snippet.replace(/&#39;/g, "'").replace(/&quot;/g, '"')}
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => setInput(`Read email ${email.id}`)}
+                    className="text-xs px-3 py-1 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
+                  >
+                    Read
+                  </button>
+                  <button
+                    onClick={() => setInput(`Archive email ${email.id}`)}
+                    className="text-xs px-3 py-1 bg-gray-50 text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+                  >
+                    Archive
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      }
+    } catch (e) {
+      // Not JSON, return as regular text
+    }
+    
+    // Regular text response
+    return <p className="text-sm whitespace-pre-wrap leading-relaxed">{content}</p>
   }
 
   return (
@@ -121,27 +189,45 @@ export default function Home() {
             </div>
             
             <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-              {emails.map((email: any) => (
-                <div 
-                  key={email.id} 
-                  className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200"
-                >
-                  <div className="flex items-start justify-between mb-1">
-                    <p className="text-sm font-medium text-gray-900 truncate flex-1">
-                      {email.from.split('<')[0].trim()}
-                    </p>
-                    <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                      {new Date(email.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-sm font-medium text-gray-700 truncate mb-1">
-                    {email.subject}
-                  </p>
-                  <p className="text-xs text-gray-500 line-clamp-2">
-                    {email.snippet}
-                  </p>
+              {emails.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-sm">No emails to display</p>
+                  <button
+                    onClick={loadEmails}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    Load emails
+                  </button>
                 </div>
-              ))}
+              ) : (
+                emails.map((email: any) => (
+                  <div 
+                    key={email.id} 
+                    onClick={() => setInput(`Read email ${email.id}`)}
+                    className="p-4 bg-white border border-gray-200 hover:border-blue-300 hover:shadow-md rounded-lg cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                          {email.from.split('<')[0].trim()}
+                        </p>
+                      </div>
+                      <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                        {new Date(email.date).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-800 truncate mb-1">
+                      {email.subject}
+                    </p>
+                    <p className="text-xs text-gray-500 line-clamp-2">
+                      {email.snippet.replace(/&#39;/g, "'").replace(/&quot;/g, '"')}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -189,7 +275,11 @@ export default function Home() {
                       ? 'bg-blue-600 text-white' 
                       : 'bg-gray-100 text-gray-900'
                   } rounded-2xl px-4 py-3`}>
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    {msg.role === 'user' ? (
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    ) : (
+                      formatResponse(msg.content)
+                    )}
                   </div>
                 </div>
               ))}
