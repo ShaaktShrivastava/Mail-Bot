@@ -2,6 +2,8 @@
 
 AI-powered email management agent built with Gemini AI. Manage your Gmail through natural conversation.
 
+LIVE PROJECT LINK :- mail-bot-git-main-shaakt.vercel.app
+
 ## Features
 
 - Natural language email control
