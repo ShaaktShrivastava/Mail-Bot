@@ -30,11 +30,20 @@ export default function Home() {
 
   const loadEmails = async () => {
     try {
-      const response = await axios.post(`${API_URL}/api/emails/list`, {
-        query: 'in:inbox',
-        max_results: 10
+      const response = await axios.post(`${API_URL}/api/agent/query`, {
+        message: 'show my inbox emails',
+        user_id: userEmail || localStorage.getItem('user_email') || 'demo-user'
       })
-      setEmails(JSON.parse(response.data.emails))
+      
+      // Try to parse the response as email list
+      try {
+        const emailData = JSON.parse(response.data.response)
+        if (Array.isArray(emailData)) {
+          setEmails(emailData)
+        }
+      } catch {
+        console.log('Could not parse emails from response')
+      }
     } catch (error) {
       console.error('Error loading emails:', error)
     }
