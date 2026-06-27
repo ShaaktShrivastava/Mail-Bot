@@ -129,7 +129,26 @@ async def google_auth(auth_req: GoogleAuthRequest):
         
         print(f"User authenticated: {email}")
         
-        # Generate JWT token without Supabase for now
+        # Save user to Supabase
+        user_data = {
+            "email": email,
+            "gmail_token": {
+                "token": credentials.token,
+                "refresh_token": credentials.refresh_token,
+                "token_uri": credentials.token_uri,
+                "client_id": credentials.client_id,
+                "client_secret": credentials.client_secret,
+                "scopes": list(credentials.scopes) if credentials.scopes else []
+            },
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        
+        print(f"Saving user to Supabase: {email}")
+        result = supabase.table("users").upsert(user_data, on_conflict="email").execute()
+        print(f"User saved successfully")
+        
+        # Generate JWT token
         token = jwt.encode(
             {"email": email, "exp": datetime.utcnow() + timedelta(days=30)},
             os.getenv("JWT_SECRET", "your-secret-key"),
@@ -235,8 +254,13 @@ async def delete_email(email_id: str):
 async def agent_query(query: UserQuery):
     """Process natural language query through agent."""
     try:
+        print(f"Agent query from user: {query.user_id}")
+        print(f"Supabase URL: {os.getenv('SUPABASE_URL')}")
+        
         # Get user's gmail token from Supabase
         user_data = supabase.table("users").select("*").eq("email", query.user_id).execute()
+        
+        print(f"Supabase response: {user_data}")
         
         if not user_data.data:
             raise HTTPException(status_code=401, detail="User not authenticated. Please sign in first.")
