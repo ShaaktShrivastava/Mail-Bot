@@ -6,12 +6,20 @@ import axios from 'axios'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
+interface Email {
+  id: string
+  from: string
+  subject: string
+  date: string
+  snippet: string
+}
+
 export default function Home() {
   const router = useRouter()
   const [messages, setMessages] = useState<Array<{role: string, content: string}>>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [emails, setEmails] = useState<Array<any>>([])
+  const [emails, setEmails] = useState<Email[]>([])
   const [userEmail, setUserEmail] = useState('')
 
   useEffect(() => {
