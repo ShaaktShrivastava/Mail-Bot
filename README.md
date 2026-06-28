@@ -4,7 +4,7 @@
 
 ![MailPilot](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-blue) ![Gmail API](https://img.shields.io/badge/Gmail-API-red) ![Next.js](https://img.shields.io/badge/Next.js-15-black) ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
 
-> **🚀 [Live Demo](https://mail-bot-git-main-shaakt.vercel.app)** | **📖 [Setup Guide](./DEMO_SETUP.md)**
+> **🚀 [Live Demo](https://mail-bot-git-main-shaakt.vercel.app)**
 
 ---
 
@@ -79,11 +79,11 @@ MailPilot is an intelligent email assistant that lets you manage your Gmail inbo
 
 ### Prerequisites
 - Node.js 18+ and Python 3.11+
-- Google Cloud Project with Gmail API enabled
-- Supabase account (free tier)
-- Gemini API key (free tier)
+- [Google Cloud Project](https://console.cloud.google.com) with Gmail API enabled
+- [Supabase account](https://supabase.com) (free tier)
+- [Gemini API key](https://aistudio.google.com/app/apikey) (free tier)
 
-### Setup
+### Installation
 
 1. **Clone the repository:**
 ```bash
@@ -91,49 +91,70 @@ git clone https://github.com/ShaaktShrivastava/Mail-Bot.git
 cd Mail-Bot
 ```
 
-2. **Set up environment variables:**
+2. **Set up Google OAuth:**
+   - Create OAuth 2.0 credentials in Google Cloud Console
+   - Add redirect URI: `http://localhost:3000/auth`
+   - Save Client ID and Secret
+
+3. **Create Supabase tables:**
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT UNIQUE NOT NULL,
+    gmail_token JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE chat_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL,
+    message TEXT NOT NULL,
+    response TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT NOW()
+);
+```
+
+4. **Configure environment variables:**
 
 **Frontend** (`frontend/.env.local`):
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-key
 ```
 
 **Backend** (`backend/.env`):
 ```env
-GEMINI_API_KEY=your-gemini-api-key
+GEMINI_API_KEY=your-gemini-key
 LLM_MODEL=gemini-2.5-flash-lite
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_REDIRECT_URI=http://localhost:3000/auth
 SUPABASE_URL=your-supabase-url
 SUPABASE_KEY=your-supabase-key
 JWT_SECRET=your-secret-key
 ```
 
-3. **Install dependencies:**
+5. **Install and run:**
 ```bash
 # Frontend
-cd frontend && npm install
-
-# Backend
-cd backend && pip install -r requirements.txt
-```
-
-4. **Run development servers:**
-```bash
-# Frontend (in frontend folder)
+cd frontend
+npm install
 npm run dev
 
-# Backend (in backend folder)
+# Backend (new terminal)
+cd backend
+pip install -r requirements.txt
 uvicorn app:app --reload
 ```
 
-5. **Open** `http://localhost:3000` and sign in with Gmail!
+6. **Open** `http://localhost:3000` and sign in with Gmail!
 
-📖 **Detailed setup guide:** [DEMO_SETUP.md](./DEMO_SETUP.md)
+### Deployment
+
+**Frontend:** Deploy to [Vercel](https://vercel.com) (auto-deploys from GitHub)  
+**Backend:** Deploy to [Render](https://render.com) (select `backend` folder)
 
 ---
 
