@@ -16,8 +16,8 @@ class MailPilotAgent:
     def __init__(self, gmail_credentials: Optional[Dict] = None):
         """Initialize agent with optional Gmail credentials from database."""
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        # IMPORTANT: Use gemini-2.5-flash-lite for higher rate limits (1000 req/day, 15 req/min)
-        # Default to gemini-2.5-flash-lite instead of gemini-3.5-flash (which has only 5 req/min)
+        # gemini-2.5-flash-lite: best price/performance, 1M token context, low latency
+        # Override via LLM_MODEL env var (e.g. gemini-2.5-flash for higher capability)
         self.model_name = os.getenv('LLM_MODEL', 'gemini-2.5-flash-lite')
         self.gmail = GmailClient(credentials_dict=gmail_credentials)
         
