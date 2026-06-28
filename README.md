@@ -198,25 +198,27 @@ Interact with your emails using conversational commands. No complex filters or r
 - 🏷️ Auto-categorization
 - ⚠️ Urgent email detection
 
-> **📝 Note**: Add your screenshots to `./assets/screenshots/` folder. See [assets/README.md](./assets/README.md) for guidelines.
-
 ---
 
 ## 🎬 Demo Video
 
-> **📹 Add your demo video**: Place `demo-video.mp4` in `./assets/demo/` folder
-> 
-> ### What to Show in Your Demo:
-> 1. **OAuth Authentication** - Secure Gmail sign-in (3 sec)
-> 2. **Natural Language Queries** - "Show me unread emails" (5 sec)
-> 3. **Email Reading** - Beautiful formatted view (5 sec)
-> 4. **AI Actions** - Summaries, replies, smart organization (10 sec)
-> 5. **One-Click Operations** - Archive, star, manage emails (5 sec)
-> 6. **Send Email** - "Send email to..." command (5 sec)
-> 
-> **Duration**: 30-60 seconds | **Format**: MP4 | **Resolution**: 1280x720 or 1920x1080
+<div align="center">
+  <video width="900" controls>
+    <source src="./assets/demo/demo-video.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <p><i>Full walkthrough showing MailPilot's AI-powered email management in action</i></p>
+</div>
 
-**See [assets/README.md](./assets/README.md) for video recording guidelines.**
+### What's Shown in the Demo:
+- 🔐 **OAuth Authentication** - Secure Gmail sign-in
+- 📧 **Natural Language Queries** - "Show me unread emails"
+- 📖 **Email Reading** - Beautiful formatted view
+- 🤖 **AI Actions** - Summaries, replies, smart organization
+- ⚡ **One-Click Operations** - Archive, star, manage emails
+- ✉️ **Send Email** - Quick email composition
+
+> **📹 Can't see the video on GitHub?** [Download it here](./assets/demo/demo-video.mp4) or watch on the [live demo site](https://mail-bot-git-main-shaakt.vercel.app)
 
 ---
 
