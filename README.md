@@ -145,7 +145,7 @@ Interact with your emails using conversational commands. No complex filters or r
 
 ### 🏠 Dashboard - Natural Language Email Management
 <div align="center">
-  <img src="https://via.placeholder.com/900x500/667EEA/FFFFFF?text=📧+MailPilot+Dashboard+|+AI+Chat+%2B+Email+Sidebar" alt="Dashboard"/>
+  <img src="./assets/screenshots/dashboard.png" alt="MailPilot Dashboard" width="900"/>
   <p><i>Interactive dashboard with AI assistant chat and real-time email sidebar</i></p>
 </div>
 
@@ -159,7 +159,7 @@ Interact with your emails using conversational commands. No complex filters or r
 
 ### 📖 Beautiful Email Reading Experience
 <div align="center">
-  <img src="https://via.placeholder.com/900x500/3B82F6/FFFFFF?text=✉️+Formatted+Email+View+|+One-Click+Actions" alt="Email Reading"/>
+  <img src="./assets/screenshots/email-read.png" alt="Email Reading View" width="900"/>
   <p><i>Beautifully formatted emails with gradient headers and action buttons</i></p>
 </div>
 
@@ -173,7 +173,7 @@ Interact with your emails using conversational commands. No complex filters or r
 
 ### 📋 Smart Email Lists
 <div align="center">
-  <img src="https://via.placeholder.com/900x500/10B981/FFFFFF?text=📊+Email+Cards+|+Interactive+Buttons" alt="Email Lists"/>
+  <img src="./assets/screenshots/email-list.png" alt="Email List Cards" width="900"/>
   <p><i>Email lists displayed as interactive cards with instant actions</i></p>
 </div>
 
@@ -187,7 +187,7 @@ Interact with your emails using conversational commands. No complex filters or r
 
 ### 🤖 AI-Powered Features
 <div align="center">
-  <img src="https://via.placeholder.com/900x500/F59E0B/FFFFFF?text=🧠+AI+Magic+|+Summaries+%2B+Actions" alt="AI Features"/>
+  <img src="./assets/screenshots/ai-response.png" alt="AI Features" width="900"/>
   <p><i>Intelligent email summaries, deadline extraction, and smart suggestions</i></p>
 </div>
 
@@ -198,20 +198,25 @@ Interact with your emails using conversational commands. No complex filters or r
 - 🏷️ Auto-categorization
 - ⚠️ Urgent email detection
 
+> **📝 Note**: Add your screenshots to `./assets/screenshots/` folder. See [assets/README.md](./assets/README.md) for guidelines.
+
 ---
 
 ## 🎬 Demo Video
 
-> **📹 Coming Soon**: Full walkthrough video showing MailPilot in action
+> **📹 Add your demo video**: Place `demo-video.mp4` in `./assets/demo/` folder
 > 
-> In the meantime, here's what you can expect to see:
-> 1. **OAuth Authentication** - Secure Gmail sign-in
-> 2. **Natural Language Queries** - "Show me unread emails"
-> 3. **Email Reading** - Beautiful formatted view
-> 4. **AI Actions** - Summaries, replies, and smart organization
-> 5. **One-Click Operations** - Archive, star, and manage emails instantly
+> ### What to Show in Your Demo:
+> 1. **OAuth Authentication** - Secure Gmail sign-in (3 sec)
+> 2. **Natural Language Queries** - "Show me unread emails" (5 sec)
+> 3. **Email Reading** - Beautiful formatted view (5 sec)
+> 4. **AI Actions** - Summaries, replies, smart organization (10 sec)
+> 5. **One-Click Operations** - Archive, star, manage emails (5 sec)
+> 6. **Send Email** - "Send email to..." command (5 sec)
+> 
+> **Duration**: 30-60 seconds | **Format**: MP4 | **Resolution**: 1280x720 or 1920x1080
 
-**Want to contribute?** Record a demo and submit a PR!
+**See [assets/README.md](./assets/README.md) for video recording guidelines.**
 
 ---
 
