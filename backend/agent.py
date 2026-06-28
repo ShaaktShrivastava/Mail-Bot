@@ -16,7 +16,7 @@ class MailPilotAgent:
     def __init__(self, gmail_credentials: Optional[Dict] = None):
         """Initialize agent with optional Gmail credentials from database."""
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        self.model_name = os.getenv('LLM_MODEL', 'gemini-1.5-flash-latest')
+        self.model_name = os.getenv('LLM_MODEL', 'gemini-1.5-flash')
         self.gmail = GmailClient(credentials_dict=gmail_credentials)
         self.chat = None
         
