@@ -536,7 +536,7 @@ Email content:
                     return f"✓ I'll remember your name as {name.title()} for email signatures."
                 return "Please tell me your name. Say: 'My name is [Your Name]'"
             
-            elif 'send' in user_lower or 'email to' in user_lower or 'write to' in user_lower:
+            elif 'send' in user_lower or 'email to' in user_lower or 'write to' in user_lower or 'compose' in user_lower:
                 console.print("[cyan]📧 Preparing to send email...[/cyan]")
                 
                 # Get user's email for signature
@@ -550,18 +550,21 @@ Request: {user_input}
 
 Create a JSON with:
 - to: recipient email address (extract from request)
-- subject: appropriate email subject (extract or generate)
+- subject: appropriate email subject (extract or generate based on context)
 - body: complete professional email body with:
   * Greeting (Dear/Hi [Name] or Hello,)
-  * Main message content
+  * Main message content (if provided, use it; if not, create a brief professional message)
   * Professional closing
   * Signature with sender name "{user_name}"
+
+IMPORTANT: If the user provides minimal information (like just "send email to xyz@example.com"), 
+create a simple, friendly test message.
 
 Example format:
 {{
   "to": "john@example.com",
-  "subject": "Meeting Request",
-  "body": "Hi John,\\n\\nI hope this email finds you well.\\n\\n[Your main message here]\\n\\nLooking forward to hearing from you.\\n\\nBest regards,\\n{user_name}"
+  "subject": "Hello from MailPilot",
+  "body": "Hi,\\n\\nThis is a test email sent via MailPilot.\\n\\nBest regards,\\n{user_name}"
 }}
 
 Return ONLY the JSON object, no other text.
@@ -587,13 +590,13 @@ JSON:"""
                     
                     # Validate
                     if not to or '@' not in to:
-                        return "❌ I couldn't find a valid recipient email address. Please specify an email like: 'Send email to john@example.com'"
+                        return "❌ I couldn't find a valid recipient email address. Please specify an email like:\n• 'Send email to john@example.com'\n• 'Send email to john@example.com saying Hello!'\n• 'Email john@example.com with subject Test'"
                     
                     if not subject:
-                        subject = "Message from MailPilot"
+                        subject = "Hello from MailPilot"
                     
                     if not body:
-                        body = f"Hello,\n\nThis is a message sent via MailPilot.\n\nBest regards,\n{user_name}"
+                        body = f"Hi,\n\nThis is a test email sent via MailPilot.\n\nBest regards,\n{user_name}"
                     
                     # Ensure proper signature if missing
                     if 'best regards' in body.lower() or 'sincerely' in body.lower() or 'regards' in body.lower():
