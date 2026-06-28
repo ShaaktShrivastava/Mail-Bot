@@ -1,73 +1,53 @@
-# 🎥 Setting Up Your Own MailPilot Demo
+# 🚀 MailPilot Setup Guide
 
-Since MailPilot requires OAuth authentication with Gmail, you'll need to set up your own instance to try it. Don't worry - it's free and takes about 10 minutes!
-
----
-
-## ⚡ Quick Deploy (Recommended)
-
-### Option 1: Deploy to Vercel + Render (Free Tier)
-
-**Frontend (Vercel):**
-1. Fork this repository
-2. Go to [Vercel](https://vercel.com) and import your fork
-3. Add environment variables (see below)
-4. Deploy!
-
-**Backend (Render):**
-1. Go to [Render](https://render.com)
-2. Create a new Web Service from your GitHub repo
-3. Select the `backend` folder
-4. Add environment variables (see below)
-5. Deploy!
+Complete guide to set up your own MailPilot instance.
 
 ---
 
-## 🔑 Required API Keys (All Free Tier)
+## 📋 Prerequisites
 
-### 1. Google Cloud (Gmail API + OAuth)
+- **Node.js 18+** and **Python 3.11+**
+- **Google Cloud Project** (free)
+- **Supabase Account** (free tier)
+- **Gemini API Key** (free tier)
 
-**Cost**: FREE (1 billion requests/day limit)
+---
 
-**Steps**:
+## 1️⃣ Google Cloud Setup (Gmail API + OAuth)
+
+### Create Google Cloud Project
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a new project
-3. Enable Gmail API
-4. Create OAuth 2.0 credentials (Web application)
-5. Add authorized redirect URIs:
-   - `http://localhost:3000/auth` (for local testing)
-   - `https://your-app.vercel.app/auth` (for production)
-6. Download credentials and note:
-   - Client ID
-   - Client Secret
+2. Create new project
+3. Enable **Gmail API**
+4. Go to **APIs & Services** → **Credentials**
+5. Create **OAuth 2.0 Client ID** (Web application)
+6. Add authorized redirect URIs:
+   - `http://localhost:3000/auth` (development)
+   - `https://your-app.vercel.app/auth` (production)
+7. Save **Client ID** and **Client Secret**
 
-### 2. Google AI Studio (Gemini API)
+---
 
-**Cost**: FREE (Free tier with generous limits)
+## 2️⃣ Gemini API Setup
 
-**Available Free Models (2026)**:
-- `gemini-3.5-flash` - Most intelligent speed model (RECOMMENDED)
-- `gemini-3.1-flash-lite` - 1,000 requests/day
-- `gemini-2.5-flash` - 250 requests/day
-- `gemini-2.5-flash-lite` - 1,000 requests/day
-
-**Steps**:
 1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Create API key
-3. Copy the key
+2. Click **Get API Key**
+3. Copy your API key
 
-### 3. Supabase (Database)
+**Free Tier Models (2026):**
+- `gemini-2.5-flash-lite` - 1,000 requests/day (recommended)
+- `gemini-3.5-flash` - Good performance
+- `gemini-2.5-flash` - 250 requests/day
 
-**Cost**: FREE (500MB database)
+---
 
-**Steps**:
+## 3️⃣ Supabase Setup
+
 1. Go to [Supabase](https://supabase.com)
-2. Create a new project
-3. Go to Project Settings → API
-4. Copy:
-   - Project URL
-   - Anon/Public Key
-5. Go to SQL Editor and run:
+2. Create new project
+3. Go to **SQL Editor** and run:
+
 ```sql
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -87,42 +67,52 @@ CREATE TABLE IF NOT EXISTS chat_history (
 );
 ```
 
+4. Go to **Project Settings** → **API**
+5. Copy **Project URL** and **Anon Key**
+
 ---
 
-## 🌍 Environment Variables
+## 4️⃣ Environment Variables
 
-### Frontend (.env.local)
+### Frontend `.env.local`
+
 ```env
-NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-### Backend (.env or Render Environment)
+### Backend `.env`
+
 ```env
 GEMINI_API_KEY=your-gemini-api-key
-LLM_MODEL=gemini-3.5-flash
-GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=https://your-app.vercel.app/auth
+LLM_MODEL=gemini-2.5-flash-lite
+GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_KEY=your-supabase-anon-key
-JWT_SECRET=generate-a-random-32-char-string
+JWT_SECRET=your-random-32-char-string
 ```
 
 ---
 
-## 🧪 Local Development
+## 5️⃣ Local Development
 
-### 1. Clone the repository
 ```bash
+# Clone repository
 git clone https://github.com/ShaaktShrivastava/Mail-Bot.git
 cd Mail-Bot
-```
 
-### 2. Set up backend
-```bash
+# Frontend setup
+cd frontend
+npm install
+cp .env.local.example .env.local
+# Edit .env.local with your keys
+npm run dev
+
+# Backend setup (new terminal)
 cd backend
 pip install -r requirements.txt
 cp .env.example .env
@@ -130,84 +120,74 @@ cp .env.example .env
 uvicorn app:app --reload
 ```
 
-### 3. Set up frontend
-```bash
-cd frontend
-npm install
-cp .env.local.example .env.local
-# Edit .env.local with your keys
-npm run dev
+Open `http://localhost:3000` and sign in!
+
+---
+
+## 6️⃣ Production Deployment
+
+### Deploy Frontend to Vercel
+
+1. Push code to GitHub
+2. Go to [Vercel](https://vercel.com)
+3. Import your repository
+4. Add environment variables (same as `.env.local`)
+5. Deploy!
+
+### Deploy Backend to Render
+
+1. Go to [Render](https://render.com)
+2. Create **Web Service** from GitHub
+3. Select `backend` folder as root directory
+4. Add environment variables (same as `.env`)
+5. Deploy!
+
+### Update OAuth Redirect URI
+
+After deployment, add production URL to Google Cloud OAuth:
+- `https://your-app.vercel.app/auth`
+
+---
+
+## 🧪 Testing Commands
+
+After setup, try these:
+
+```
+show me emails
+send email to test@example.com saying Hello!
+summarize my inbox
+search for emails about project
 ```
 
-### 4. Open browser
-Go to `http://localhost:3000` and sign in with your Gmail account!
+---
+
+## 🆘 Troubleshooting
+
+### "User not authenticated"
+→ Sign in with Gmail first
+
+### "Rate limit exceeded"
+→ Using free tier? Wait 1 minute between commands  
+→ Switch to `gemini-2.5-flash-lite` model
+
+### "Gmail not connected"
+→ Check OAuth credentials are correct  
+→ Verify redirect URI matches exactly
+
+### Frontend won't load
+→ Check `NEXT_PUBLIC_API_URL` points to backend  
+→ Verify backend is running on port 8000
 
 ---
 
-## 🎬 Recording a Demo
+## 📚 Resources
 
-Want to contribute a demo video? Here's how:
-
-### Tools:
-- **Screen Recording**: OBS Studio (free), Loom, or built-in screen recorder
-- **Video Editing**: DaVinci Resolve (free) or iMovie
-
-### What to Show:
-1. **Landing page** (2 seconds)
-2. **Sign in with Google** (5 seconds)
-3. **Dashboard view** (5 seconds)
-4. **Type command**: "Show me unread emails" (10 seconds)
-5. **Email list cards** (5 seconds)
-6. **Click "Read" button** (3 seconds)
-7. **Formatted email view** (5 seconds)
-8. **Type command**: "Summarize this email" (10 seconds)
-9. **AI summary response** (5 seconds)
-10. **One-click actions**: Archive, Star (5 seconds)
-
-**Total**: ~60 seconds
-
-### Where to Upload:
-- YouTube (unlisted or public)
-- GitHub Release
-- Submit PR with link in README
+- [Gmail API Docs](https://developers.google.com/gmail/api)
+- [Gemini API Docs](https://ai.google.dev/gemini-api/docs)
+- [Next.js Docs](https://nextjs.org/docs)
+- [FastAPI Docs](https://fastapi.tiangolo.com)
 
 ---
 
-## 📸 Taking Screenshots
-
-### Recommended Resolution:
-- **Desktop**: 1920x1080 (then crop to 900x500)
-- **Format**: PNG or WebP
-
-### What to Capture:
-1. Dashboard with email sidebar + chat
-2. Email reading view with formatted content
-3. Email list with cards and buttons
-4. AI response showing summary or actions
-
-### Tools:
-- **Mac**: Cmd + Shift + 4
-- **Windows**: Win + Shift + S
-- **Browser Extension**: Awesome Screenshot
-
----
-
-## 🆘 Need Help?
-
-- **Issues**: [GitHub Issues](https://github.com/ShaaktShrivastava/Mail-Bot/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ShaaktShrivastava/Mail-Bot/discussions)
-- **Documentation**: See [README.md](./README.md)
-
----
-
-## 💡 Pro Tips
-
-1. **Use test emails** for screenshots (don't expose personal data)
-2. **Create a test Gmail account** for demos
-3. **Blur sensitive information** in recordings
-4. **Keep videos under 2 minutes** for better engagement
-5. **Add captions** to explain what's happening
-
----
-
-**Happy demoing! 🎉**
+**Need help?** [Open an issue](https://github.com/ShaaktShrivastava/Mail-Bot/issues)
