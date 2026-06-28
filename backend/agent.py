@@ -700,5 +700,8 @@ Answer the user's question briefly and directly. Don't ask follow-up questions."
 What would you like to do?"""
             
         except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
             console.print(f"[red]Error: {str(e)}[/red]")
-            return f"I encountered an error. Please try rephrasing your request."
+            console.print(f"[red]Full traceback:\n{error_trace}[/red]")
+            return f"❌ Error: {str(e)}\n\nTry a simpler command like 'show me emails' or check the logs."
