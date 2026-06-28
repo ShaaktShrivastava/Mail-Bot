@@ -16,9 +16,13 @@ class MailPilotAgent:
     def __init__(self, gmail_credentials: Optional[Dict] = None):
         """Initialize agent with optional Gmail credentials from database."""
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        # Use gemini-2.5-flash-lite for higher rate limits (1000 req/day vs 5 req/min on 3.5)
+        # IMPORTANT: Use gemini-2.5-flash-lite for higher rate limits (1000 req/day, 15 req/min)
+        # Default to gemini-2.5-flash-lite instead of gemini-3.5-flash (which has only 5 req/min)
         self.model_name = os.getenv('LLM_MODEL', 'gemini-2.5-flash-lite')
         self.gmail = GmailClient(credentials_dict=gmail_credentials)
+        
+        # Log which model is being used
+        console.print(f"[cyan]🤖 Using model: {self.model_name}[/cyan]")
         self.chat = None
         
         # Agent capabilities
@@ -289,7 +293,9 @@ class MailPilotAgent:
             prompt += f"Additional instructions: {instructions}\n\n"
         prompt += "Write only the reply body, keep it concise and professional."
         
-        response = self.model.generate_content(prompt)
+        # Use simple model without function calling
+        simple_model = genai.GenerativeModel(model_name=self.model_name)
+        response = simple_model.generate_content(prompt)
         return response.text
     
     def classify_email(self, email_content: str) -> str:
@@ -307,7 +313,9 @@ Email content:
 
 Respond with only the category name and a brief reason."""
         
-        response = self.model.generate_content(prompt)
+        # Use simple model without function calling
+        simple_model = genai.GenerativeModel(model_name=self.model_name)
+        response = simple_model.generate_content(prompt)
         return response.text
     
     def extract_deadlines(self, email_content: str) -> str:
@@ -318,7 +326,9 @@ Format as a list with date and description.
 Email content:
 {email_content}"""
         
-        response = self.model.generate_content(prompt)
+        # Use simple model without function calling
+        simple_model = genai.GenerativeModel(model_name=self.model_name)
+        response = simple_model.generate_content(prompt)
         return response.text
     
     def archive_email(self, message_id: str) -> str:
@@ -395,7 +405,9 @@ Email content:
 
 {emails_text}"""
         
-        response = self.model.generate_content(prompt)
+        # Use a simple model instance without function calling for summaries
+        simple_model = genai.GenerativeModel(model_name=self.model_name)
+        response = simple_model.generate_content(prompt)
         return response.text
     
     def check_urgent_emails(self) -> str:
@@ -643,7 +655,9 @@ Email content:
 Answer the user's question briefly and directly. Don't ask follow-up questions."""
                     
                     prompt = f"{system_prompt}\n\nUser: {user_input}\n\nAnswer:"
-                    response = self.model.generate_content(prompt)
+                    # Use simple model without function calling
+                    simple_model = genai.GenerativeModel(model_name=self.model_name)
+                    response = simple_model.generate_content(prompt)
                     return response.text
                 else:
                     # Unclear command
