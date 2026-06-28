@@ -4,6 +4,8 @@
 
 MailPilot combines the power of Google's Gemini 2.5 Flash AI with Gmail's API to create an intelligent assistant that understands natural language, manages your emails proactively, and helps you stay organized effortlessly.
 
+**🌐 LIVE DEMO**: [mail-bot-git-main-shaakt.vercel.app](https://mail-bot-git-main-shaakt.vercel.app/)
+
 ![MailPilot](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-blue) ![Gmail API](https://img.shields.io/badge/Gmail-API%20Integrated-red) ![Next.js](https://img.shields.io/badge/Next.js-15-black) ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
 
 ---
