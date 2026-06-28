@@ -43,7 +43,13 @@ Since MailPilot requires OAuth authentication with Gmail, you'll need to set up 
 
 ### 2. Google AI Studio (Gemini API)
 
-**Cost**: FREE (60 requests/minute)
+**Cost**: FREE (Free tier with generous limits)
+
+**Available Free Models (2026)**:
+- `gemini-3.5-flash` - Most intelligent speed model (RECOMMENDED)
+- `gemini-3.1-flash-lite` - 1,000 requests/day
+- `gemini-2.5-flash` - 250 requests/day
+- `gemini-2.5-flash-lite` - 1,000 requests/day
 
 **Steps**:
 1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
@@ -96,6 +102,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ### Backend (.env or Render Environment)
 ```env
 GEMINI_API_KEY=your-gemini-api-key
+LLM_MODEL=gemini-3.5-flash
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_REDIRECT_URI=https://your-app.vercel.app/auth
