@@ -328,14 +328,11 @@ Email content:
     
     def send_email(self, to: str, subject: str, body: str) -> str:
         """Send an email."""
-        console.print(f"[yellow]⚠️  About to send email to: {to}[/yellow]")
-        console.print(f"[yellow]Subject: {subject}[/yellow]")
-        confirm = console.input("[yellow]Confirm send? (yes/no): [/yellow]")
-        
-        if confirm.lower() in ['yes', 'y']:
-            success = self.gmail.send_message(to, subject, body)
-            return "Email sent successfully!" if success else "Failed to send email."
-        return "Email send cancelled."
+        console.print(f"[cyan]📧 Sending email to: {to}[/cyan]")
+        console.print(f"[cyan]Subject: {subject}[/cyan]")
+        # No confirmation needed in web API mode
+        success = self.gmail.send_message(to, subject, body)
+        return f"✅ Email sent successfully to {to}!" if success else "❌ Failed to send email."
     
     def mark_as_read(self, message_id: str) -> str:
         """Mark email as read."""
@@ -353,13 +350,10 @@ Email content:
     
     def delete_email(self, message_id: str) -> str:
         """Delete an email (move to trash)."""
-        console.print(f"[red]⚠️  About to delete email ID: {message_id}[/red]")
-        confirm = console.input("[red]Confirm delete? (yes/no): [/red]")
-        
-        if confirm.lower() in ['yes', 'y']:
-            success = self.gmail.trash_message(message_id)
-            return "Email deleted." if success else "Failed to delete email."
-        return "Delete cancelled."
+        console.print(f"[cyan]🗑️  Deleting email ID: {message_id}[/cyan]")
+        # No confirmation needed in web API mode
+        success = self.gmail.trash_message(message_id)
+        return f"✅ Email deleted (moved to trash)." if success else "❌ Failed to delete email."
     
     def search_emails(self, search_query: str, max_results: int = 10) -> str:
         """Search emails with specific criteria."""
