@@ -16,7 +16,8 @@ class MailPilotAgent:
     def __init__(self, gmail_credentials: Optional[Dict] = None):
         """Initialize agent with optional Gmail credentials from database."""
         genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-        self.model_name = os.getenv('LLM_MODEL', 'gemini-3.5-flash')
+        # Use gemini-2.5-flash-lite for higher rate limits (1000 req/day vs 5 req/min on 3.5)
+        self.model_name = os.getenv('LLM_MODEL', 'gemini-2.5-flash-lite')
         self.gmail = GmailClient(credentials_dict=gmail_credentials)
         self.chat = None
         
@@ -540,86 +541,55 @@ Email content:
                 console.print("[cyan]📧 Preparing to send email...[/cyan]")
                 
                 # Get user's email for signature
-                user_email = self.memory.get_preference('user_email', 'User')
                 user_name = self.memory.get_preference('user_name', 'MailPilot User')
                 
-                # Use LLM to extract and generate email details
-                prompt = f"""You are drafting a professional email. Extract details and create a complete, well-formatted email.
-
-Request: {user_input}
-
-Create a JSON with:
-- to: recipient email address (extract from request)
-- subject: appropriate email subject (extract or generate based on context)
-- body: complete professional email body with:
-  * Greeting (Dear/Hi [Name] or Hello,)
-  * Main message content (if provided, use it; if not, create a brief professional message)
-  * Professional closing
-  * Signature with sender name "{user_name}"
-
-IMPORTANT: If the user provides minimal information (like just "send email to xyz@example.com"), 
-create a simple, friendly test message.
-
-Example format:
-{{
-  "to": "john@example.com",
-  "subject": "Hello from MailPilot",
-  "body": "Hi,\\n\\nThis is a test email sent via MailPilot.\\n\\nBest regards,\\n{user_name}"
-}}
-
-Return ONLY the JSON object, no other text.
-
-JSON:"""
+                # Try to extract email using regex first (no API call needed)
+                import re
+                email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                emails = re.findall(email_pattern, user_input)
                 
-                response = self.model.generate_content(prompt)
-                email_text = response.text.strip()
+                if not emails:
+                    return "❌ I couldn't find an email address. Please specify:\n• 'send email to john@example.com'\n• 'send email to john@example.com saying Hello!'"
                 
-                # Clean up response
-                if '```json' in email_text:
-                    email_text = email_text.split('```json')[1].split('```')[0]
-                elif '```' in email_text:
-                    email_text = email_text.split('```')[1].split('```')[0]
+                to = emails[0]
                 
-                email_text = email_text.strip()
+                # Extract message after "saying" or "with message" etc
+                message = ""
+                for keyword in ['saying ', 'with message ', 'message ', 'that says ', 'body ']:
+                    if keyword in user_lower:
+                        parts = user_input.lower().split(keyword, 1)
+                        if len(parts) > 1:
+                            message = user_input.split(keyword, 1)[1].strip()
+                            break
                 
-                try:
-                    email_data = json.loads(email_text)
-                    to = email_data.get('to', '').strip()
-                    subject = email_data.get('subject', '').strip()
-                    body = email_data.get('body', '').strip()
-                    
-                    # Validate
-                    if not to or '@' not in to:
-                        return "❌ I couldn't find a valid recipient email address. Please specify an email like:\n• 'Send email to john@example.com'\n• 'Send email to john@example.com saying Hello!'\n• 'Email john@example.com with subject Test'"
-                    
-                    if not subject:
-                        subject = "Hello from MailPilot"
-                    
-                    if not body:
-                        body = f"Hi,\n\nThis is a test email sent via MailPilot.\n\nBest regards,\n{user_name}"
-                    
-                    # Ensure proper signature if missing
-                    if 'best regards' in body.lower() or 'sincerely' in body.lower() or 'regards' in body.lower():
-                        # Check if name is after closing
-                        if not any(name_part in body for name_part in user_name.split()):
-                            body = body.rstrip() + f"\n{user_name}"
-                    else:
-                        # Add closing and signature
-                        body = body.rstrip() + f"\n\nBest regards,\n{user_name}"
-                    
-                    # Show what will be sent
-                    console.print(f"\n[yellow]📨 Email Preview:[/yellow]")
-                    console.print(f"[yellow]To: {to}[/yellow]")
-                    console.print(f"[yellow]Subject: {subject}[/yellow]")
-                    console.print(f"[yellow]Body:\n{body}[/yellow]\n")
-                    
-                    # Send directly
-                    return self.send_email(to, subject, body)
-                    
-                except json.JSONDecodeError as e:
-                    console.print(f"[red]JSON parse error: {e}[/red]")
-                    console.print(f"[red]Response was: {email_text}[/red]")
-                    return "❌ I couldn't understand your email request. Try being more specific:\n'Send email to john@example.com with subject Hello saying Hi John, how are you?'"
+                # Extract subject
+                subject = "Hello from MailPilot"
+                if 'subject' in user_lower:
+                    sub_parts = user_input.lower().split('subject', 1)
+                    if len(sub_parts) > 1:
+                        # Extract until "saying" or "message" or end
+                        sub_text = sub_parts[1].strip()
+                        for stopper in [' saying ', ' message ', ' body ', ' with ']:
+                            if stopper in sub_text:
+                                sub_text = sub_text.split(stopper)[0]
+                                break
+                        subject = sub_text.strip()
+                
+                # Build body
+                if message:
+                    body = f"Hi,\n\n{message}\n\nBest regards,\n{user_name}"
+                else:
+                    # Default test message
+                    body = f"Hi,\n\nThis is a test email sent via MailPilot.\n\nBest regards,\n{user_name}"
+                
+                # Show what will be sent
+                console.print(f"\n[yellow]📨 Email Preview:[/yellow]")
+                console.print(f"[yellow]To: {to}[/yellow]")
+                console.print(f"[yellow]Subject: {subject}[/yellow]")
+                console.print(f"[yellow]Body:\n{body}[/yellow]\n")
+                
+                # Send directly (no API call)
+                return self.send_email(to, subject, body)
             
             elif 'read' in user_lower and 'email' in user_lower:
                 # Try to extract email ID
