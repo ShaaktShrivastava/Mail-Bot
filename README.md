@@ -4,7 +4,9 @@
 
 MailPilot combines the power of Google's Gemini 2.5 Flash AI with Gmail's API to create an intelligent assistant that understands natural language, manages your emails proactively, and helps you stay organized effortlessly.
 
-**🌐 LIVE DEMO**: [mail-bot-git-main-shaakt.vercel.app](https://mail-bot-git-main-shaakt.vercel.app/)
+> **⚠️ Note**: This project requires Google OAuth authentication with Gmail. To try it yourself, you'll need to set up your own Google Cloud project with Gmail API access.
+> 
+> **📖 [Complete Setup Guide](./DEMO_SETUP.md)** | **🎥 [Demo Video](#-demo-video)** | **� [Screenshots](#-screenshots)**
 
 ![MailPilot](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-blue) ![Gmail API](https://img.shields.io/badge/Gmail-API%20Integrated-red) ![Next.js](https://img.shields.io/badge/Next.js-15-black) ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green)
 
@@ -139,6 +141,80 @@ Interact with your emails using conversational commands. No complex filters or r
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 Dashboard - Natural Language Email Management
+<div align="center">
+  <img src="https://via.placeholder.com/900x500/667EEA/FFFFFF?text=📧+MailPilot+Dashboard+|+AI+Chat+%2B+Email+Sidebar" alt="Dashboard"/>
+  <p><i>Interactive dashboard with AI assistant chat and real-time email sidebar</i></p>
+</div>
+
+**Features shown:**
+- 💬 Natural language chat interface
+- 📧 Live email inbox sidebar
+- 🎯 Quick action suggestions
+- ⚡ Real-time email updates
+
+---
+
+### 📖 Beautiful Email Reading Experience
+<div align="center">
+  <img src="https://via.placeholder.com/900x500/3B82F6/FFFFFF?text=✉️+Formatted+Email+View+|+One-Click+Actions" alt="Email Reading"/>
+  <p><i>Beautifully formatted emails with gradient headers and action buttons</i></p>
+</div>
+
+**Features shown:**
+- 🎨 Clean, formatted email display
+- 📅 Smart date formatting
+- 🔗 Clickable links
+- ✍️ Draft Reply & Summarize buttons
+
+---
+
+### 📋 Smart Email Lists
+<div align="center">
+  <img src="https://via.placeholder.com/900x500/10B981/FFFFFF?text=📊+Email+Cards+|+Interactive+Buttons" alt="Email Lists"/>
+  <p><i>Email lists displayed as interactive cards with instant actions</i></p>
+</div>
+
+**Features shown:**
+- 🃏 Card-based email display
+- 📖 Read, 📦 Archive, ⭐ Star buttons
+- 📱 Responsive design
+- 🎯 Sender and subject highlights
+
+---
+
+### 🤖 AI-Powered Features
+<div align="center">
+  <img src="https://via.placeholder.com/900x500/F59E0B/FFFFFF?text=🧠+AI+Magic+|+Summaries+%2B+Actions" alt="AI Features"/>
+  <p><i>Intelligent email summaries, deadline extraction, and smart suggestions</i></p>
+</div>
+
+**AI Capabilities:**
+- 📝 Email summarization
+- 📅 Deadline extraction
+- ✍️ Context-aware reply drafting
+- 🏷️ Auto-categorization
+- ⚠️ Urgent email detection
+
+---
+
+## 🎬 Demo Video
+
+> **📹 Coming Soon**: Full walkthrough video showing MailPilot in action
+> 
+> In the meantime, here's what you can expect to see:
+> 1. **OAuth Authentication** - Secure Gmail sign-in
+> 2. **Natural Language Queries** - "Show me unread emails"
+> 3. **Email Reading** - Beautiful formatted view
+> 4. **AI Actions** - Summaries, replies, and smart organization
+> 5. **One-Click Operations** - Archive, star, and manage emails instantly
+
+**Want to contribute?** Record a demo and submit a PR!
+
+---
+
 ## 🔐 Security & Privacy
 
 - **OAuth 2.0** - Industry-standard secure authentication
@@ -152,10 +228,16 @@ Interact with your emails using conversational commands. No complex filters or r
 
 ## 🛠️ Quick Start
 
+> **👥 For Visitors**: This project requires your own Gmail OAuth setup. Follow the instructions below to deploy your own instance!
+> 
+> **🚀 For Developers**: Clone, configure, and deploy in under 10 minutes!
+
 ### Prerequisites
 - Node.js 18+ and Python 3.11+
 - Gmail account
 - Google Cloud Project with Gmail API enabled
+- Supabase account (free tier)
+- Gemini API key (free tier available)
 - Supabase account
 - Gemini API key
 
