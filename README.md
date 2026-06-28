@@ -57,7 +57,7 @@ MailPilot is an intelligent email assistant that lets you manage your Gmail inbo
 
 <div align="center">
   
-[![Watch Demo Video](https://img.shields.io/badge/▶️_Watch_Demo_Video-Click_Here-red?style=for-the-badge)](./assets/demo/demo-video.mp4)
+
 
 **[📥 Download Demo Video](./assets/demo/demo-video.mp4)**
 
