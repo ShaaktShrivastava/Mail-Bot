@@ -11,6 +11,7 @@ class ProactiveAgent:
     def __init__(self, gmail: GmailClient, model: genai.GenerativeModel, memory):
         self.gmail = gmail
         self.model = model
+        self.model_name = model.model_name  # Store model name for creating simple instances
         self.memory = memory
         self.last_check = None
     
@@ -35,7 +36,9 @@ Subject: {email['subject']}
 Snippet: {email['snippet']}"""
         
         try:
-            response = self.model.generate_content(prompt)
+            # Use simple model without function calling
+            simple_model = genai.GenerativeModel(model_name=self.model_name)
+            response = simple_model.generate_content(prompt)
             return 'yes' in response.text.lower()
         except:
             return False
@@ -57,7 +60,9 @@ Content: {email.get('snippet', '')}
 Return as comma-separated list of action words only."""
         
         try:
-            response = self.model.generate_content(prompt)
+            # Use simple model without function calling
+            simple_model = genai.GenerativeModel(model_name=self.model_name)
+            response = simple_model.generate_content(prompt)
             actions = [a.strip() for a in response.text.strip().split(',')]
             return actions
         except:
@@ -93,7 +98,9 @@ Snippet: {email['snippet']}
 Respond with only the category word."""
         
         try:
-            response = self.model.generate_content(prompt)
+            # Use simple model without function calling
+            simple_model = genai.GenerativeModel(model_name=self.model_name)
+            response = simple_model.generate_content(prompt)
             return response.text.strip().lower()
         except:
             return 'normal'
@@ -120,7 +127,9 @@ Emails:
 {email_summary}"""
         
         try:
-            response = self.model.generate_content(prompt)
+            # Use simple model without function calling
+            simple_model = genai.GenerativeModel(model_name=self.model_name)
+            response = simple_model.generate_content(prompt)
             return response.text
         except:
             return f"Received {len(emails)} emails today."

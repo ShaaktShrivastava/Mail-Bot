@@ -197,58 +197,43 @@ async def list_emails(query_req: QueryRequest):
 
 @app.post("/api/emails/send")
 async def send_email(email_req: EmailRequest):
-    """Send an email."""
-    try:
-        agent = MailPilotAgent()
-        # Note: Bypassing confirmation for API
-        result = agent.gmail.send_message(email_req.to, email_req.subject, email_req.body)
-        
-        if result:
-            return {"success": True, "message": "Email sent successfully"}
-        else:
-            raise HTTPException(status_code=500, detail="Failed to send email")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Send an email - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400, 
+        detail="Please use /api/agent/query endpoint with: 'send email to user@example.com saying your message'"
+    )
 
 @app.get("/api/emails/{email_id}")
 async def read_email(email_id: str):
-    """Read a specific email."""
-    try:
-        agent = MailPilotAgent()
-        result = agent.read_email(email_id)
-        return {"email": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Read a specific email - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use /api/agent/query endpoint with: 'read email ID xyz'"
+    )
 
 @app.post("/api/emails/{email_id}/archive")
 async def archive_email(email_id: str):
-    """Archive an email."""
-    try:
-        agent = MailPilotAgent()
-        result = agent.archive_email(email_id)
-        return {"success": True, "message": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Archive an email - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use /api/agent/query endpoint with: 'archive email ID xyz'"
+    )
 
 @app.post("/api/emails/{email_id}/star")
 async def star_email(email_id: str):
-    """Star an email."""
-    try:
-        agent = MailPilotAgent()
-        result = agent.star_email(email_id, star=True)
-        return {"success": True, "message": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Star an email - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use /api/agent/query endpoint with: 'star email ID xyz'"
+    )
 
 @app.post("/api/emails/{email_id}/delete")
 async def delete_email(email_id: str):
-    """Delete an email."""
-    try:
-        agent = MailPilotAgent()
-        result = agent.gmail.trash_message(email_id)
-        return {"success": result, "message": "Email deleted" if result else "Failed to delete"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Delete an email - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use /api/agent/query endpoint with: 'delete email ID xyz'"
+    )
 
 @app.post("/api/agent/query")
 async def agent_query(query: UserQuery):
@@ -257,17 +242,30 @@ async def agent_query(query: UserQuery):
         print(f"Agent query from user: {query.user_id}")
         print(f"Supabase URL: {os.getenv('SUPABASE_URL')}")
         
+        # Validate environment
+        if not os.getenv('GEMINI_API_KEY'):
+            raise HTTPException(status_code=500, detail="GEMINI_API_KEY not configured. Please set up environment variables.")
+        
+        if not os.getenv('SUPABASE_URL') or not os.getenv('SUPABASE_KEY'):
+            raise HTTPException(status_code=500, detail="Supabase not configured. Please set SUPABASE_URL and SUPABASE_KEY.")
+        
         # Get user's gmail token from Supabase
         user_data = supabase.table("users").select("*").eq("email", query.user_id).execute()
         
         print(f"Supabase response: {user_data}")
         
         if not user_data.data:
-            raise HTTPException(status_code=401, detail="User not authenticated. Please sign in first.")
+            raise HTTPException(
+                status_code=401, 
+                detail="User not authenticated. Please sign in with Google first."
+            )
         
         gmail_token = user_data.data[0].get('gmail_token')
         if not gmail_token:
-            raise HTTPException(status_code=401, detail="Gmail not connected. Please authenticate with Gmail.")
+            raise HTTPException(
+                status_code=401, 
+                detail="Gmail not connected. Please authenticate with Gmail."
+            )
         
         # Create agent with user's Gmail credentials
         agent = MailPilotAgent(gmail_credentials=gmail_token)
@@ -282,8 +280,9 @@ async def agent_query(query: UserQuery):
                 "response": result,
                 "timestamp": datetime.now().isoformat()
             }).execute()
-        except:
-            pass  # Don't fail if chat history save fails
+        except Exception as history_error:
+            print(f"Failed to save chat history: {history_error}")
+            # Don't fail the request if history save fails
         
         return {"response": result}
     except HTTPException:
@@ -291,38 +290,45 @@ async def agent_query(query: UserQuery):
     except Exception as e:
         print(f"Query error: {e}")
         import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        error_trace = traceback.format_exc()
+        print(f"Full traceback:\n{error_trace}")
+        
+        # Provide helpful error messages
+        error_msg = str(e)
+        if "429" in error_msg or "quota" in error_msg.lower():
+            detail = "⏱️ Rate limit exceeded. Please wait a moment and try again. Tip: The free tier has limited requests per minute."
+        elif "401" in error_msg or "unauthorized" in error_msg.lower():
+            detail = "🔐 Authentication error. Please sign out and sign in again with Gmail."
+        elif "404" in error_msg or "not found" in error_msg.lower():
+            detail = "❌ Resource not found. Please check your request and try again."
+        else:
+            detail = f"❌ Error: {error_msg}\n\nTry a simpler command like 'show me emails' or check the logs."
+        
+        raise HTTPException(status_code=500, detail=detail)
 
 @app.post("/api/emails/summarize")
 async def summarize_emails(query_req: QueryRequest):
-    """Get email summary."""
-    try:
-        agent = MailPilotAgent()
-        result = agent.get_email_summary(query=query_req.query, max_emails=query_req.max_results)
-        return {"summary": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Get email summary - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use /api/agent/query endpoint with: 'summarize my inbox' or 'summarize unread emails'"
+    )
 
 @app.get("/api/emails/urgent")
 async def check_urgent():
-    """Check for urgent emails."""
-    try:
-        agent = MailPilotAgent()
-        result = agent.check_urgent_emails()
-        return {"urgent_emails": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Check for urgent emails - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use /api/agent/query endpoint with: 'check urgent emails'"
+    )
 
 @app.get("/api/digest/daily")
 async def daily_digest():
-    """Generate daily digest."""
-    try:
-        agent = MailPilotAgent()
-        result = agent.generate_daily_digest()
-        return {"digest": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Generate daily digest - DEPRECATED: Use /api/agent/query instead."""
+    raise HTTPException(
+        status_code=400,
+        detail="Please use /api/agent/query endpoint with: 'generate daily digest'"
+    )
 
 if __name__ == "__main__":
     import uvicorn
